@@ -1,0 +1,26 @@
+# List of legal topics
+temas_legales = [
+    "Divorcio", "PQR", "Abandono de bienes", "Abandono de menores","Abuso de autoridad",
+    "Tutela", "Alimentos", "Adopción", "Acoso laboral", "Acoso sexual", "Accidente de trabajo",
+    "Accidente de tránsito", "Afectación al derecho al buen nombre", "Amparo", "Arrendamiento",
+    "Asistencia familiar", "Aspiración de la paternidad", "Asociaciones civiles", "Auditoría contable",
+    "Autorización de viaje de menores", "Bienes gananciales", "Calumnia", "Cancelación de antecedentes penales",
+    "Capitulaciones matrimoniales", "Cesión de derechos", "Cierre de establecimientos", "Cláusulas abusivas",
+    "Cohecho", "Conciliación", "Contrato de trabajo", "Contrato de arrendamiento", "Contrato de compraventa",
+    "Contratos civiles", "Contratos mercantiles", "Convenio regulador", "Daños y perjuicios",
+    "Declaración de herederos", "Delitos informáticos", "Derecho administrativo", "Derecho civil",
+    "Derecho comercial", "Derecho constitucional", "Derecho de autor", "Derecho de familia",
+    "Derecho de propiedad", "Derecho laboral", "Desahucio", "Desestimación de demanda", "Deslinde y amojonamiento",
+    "Despido injustificado", "División de bienes", "Donación", "Emancipación", "Exequatur", "Expropiación",
+    "Extinción de dominio", "Falsedad documental", "Filiación", "Fraude", "Gestión administrativa", "Habeas corpus",
+    "Herencias", "Impuesto de sucesiones", "Incapacitación", "Inmigración", "Inscripción de nacimiento",
+    "Interdicto", "Inventarios", "Juicio ejecutivo", "Juicio ordinario", "Juicios monitorios", "Juntas de conciliación",
+    "Lesiones personales", "Licencia de maternidad", "Mediación", "Medidas cautelares", "Nulidad matrimonial",
+    "Obligaciones", "Orden de alejamiento", "Pensión alimentaria", "Pensión de invalidez", "Pensión de jubilación",
+    "Permuta", "Planificación sucesoria", "Poderes notariales", "Prescripción adquisitiva", "Procesos de ejecución",
+    "Propiedad horizontal", "Reclamación de deudas", "Reclamación de daños", "Recurso de apelación",
+    "Recurso de casación", "Registro de marcas", "Reivindicación", "Reinserción laboral", "Renovación de contratos",
+    "Responsabilidad civil", "Separación de bienes", "Servidumbres", "Sobreseimiento", "Subsidio de desempleo",
+    "Suspensión de pagos", "Testamento", "Tráfico de influencias", "Usufructo", "Venta judicial",
+    "Violencia doméstica", "Violencia de género"
+]
