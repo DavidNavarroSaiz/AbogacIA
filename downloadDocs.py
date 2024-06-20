@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
@@ -11,6 +10,9 @@ import shutil
 temas_legales = [
     "Divorcio", "PQR", "Abandono de bienes", "Abandono de menores"
 ]
+
+# Global variable for number of documents to download per topic
+NUM_DOCUMENTS = 10
 
 def create_download_directory(topic):
     topic_dir = os.path.join("./downloads", topic)
@@ -47,8 +49,55 @@ def initialize_driver(download_dir):
     driver = webdriver.Firefox(options=firefox_options)
     return driver
 
-def download_documents(driver, topic, num_documents=10):
+def read_downloaded_ids(topic):
+    topic_dir = create_download_directory(topic)
+    downloaded_ids_file = os.path.join(topic_dir, "downloaded_ids.txt")
+    if not os.path.exists(downloaded_ids_file):
+        return set()
+    
+    with open(downloaded_ids_file, "r") as file:
+        return set(file.read().splitlines())
+
+def save_downloaded_id(topic, doc_id):
+    topic_dir = create_download_directory(topic)
+    downloaded_ids_file = os.path.join(topic_dir, "downloaded_ids.txt")
+    with open(downloaded_ids_file, "a") as file:
+        file.write(f"{doc_id}\n")
+
+def get_current_page_number(driver):
     try:
+        page_number_element = driver.find_element(By.XPATH, '//*[@id="resultForm:pagText2"]')
+        page_text = page_number_element.text.strip()
+        if "Resultado:" in page_text:
+            parts = page_text.split()
+            return int(parts[1])
+        return None
+    except:
+        return None
+
+def get_document_ids_on_page(driver, page_number):
+    document_id = ""
+    i = page_number - 1
+    
+    for font_index in [2, 3, 4]:
+        try:
+            id_label_xpath = f'//*[@id="resultForm:jurisTable:{i}:descrip"]/div/div/font[{font_index}]'
+            id_label = driver.find_element(By.XPATH, id_label_xpath)
+            if id_label.text == "ID:":
+                id_value_xpath = f'//*[@id="resultForm:jurisTable:{i}:descrip"]/div/div/font[{font_index + 1}]'
+                id_value = driver.find_element(By.XPATH, id_value_xpath).text
+                document_id = id_value
+                break  # Stop searching further once ID is found
+        except:
+            continue
+    return document_id
+
+def download_documents(driver, topic, num_documents):
+    try:
+        downloaded_ids = read_downloaded_ids(topic)
+        current_page = None
+        consecutive_page_count = 0
+
         # Ensure the sidebar is visible
         sidebar_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="resultForm:hidebutton"]/span[1]'))
@@ -75,27 +124,50 @@ def download_documents(driver, topic, num_documents=10):
         
         time.sleep(10)
 
-        downloaded_count = 0
+        downloaded_count = len(downloaded_ids)
+        print(f"Number of documents already downloaded for topic '{topic}': {downloaded_count}")
+        if downloaded_count >= num_documents:
+            print(f"Already have {num_documents} or more documents for topic '{topic}'. Skipping download.")
+            return
 
         while downloaded_count < num_documents:
-            download_button = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "resultForm:j_idt259_menuButton"))
-            )
-            driver.execute_script("arguments[0].click();", download_button)
-            
-            pdf_option = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "resultForm:j_idt262"))
-            )
-            driver.execute_script("arguments[0].click();", pdf_option)
+            new_page = get_current_page_number(driver)
+            if new_page is not None:
+                if new_page == current_page:
+                    consecutive_page_count += 1
+                    if consecutive_page_count >= 3:
+                        print(f"Stopped searching for topic '{topic}' as the page did not change for 3 consecutive attempts.")
+                        break
+                else:
+                    consecutive_page_count = 0
+                    current_page = new_page
 
-            time.sleep(10)
+                document_id_on_page = get_document_ids_on_page(driver, current_page)
+                if document_id_on_page and document_id_on_page not in downloaded_ids:
+                    download_button = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "resultForm:j_idt259_menuButton"))
+                    )
+                    driver.execute_script("arguments[0].click();", download_button)
+                    
+                    pdf_option = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "resultForm:j_idt262"))
+                    )
+                    driver.execute_script("arguments[0].click();", pdf_option)
 
-            files = os.listdir("./downloads")
-            if any(file.endswith(".pdf") for file in files):
-                print(f"PDF file {downloaded_count + 1} has been downloaded successfully for topic '{topic}'.")
-                downloaded_count += 1
-            else:
-                print(f"PDF file download failed for topic '{topic}'.")
+                    time.sleep(10)
+
+                    files = os.listdir("./downloads")
+                    if any(file.endswith(".pdf") for file in files):
+                        print(f"PDF file {downloaded_count + 1} has been downloaded successfully for topic '{topic}'.")
+                        downloaded_count += 1
+                        save_downloaded_id(topic, document_id_on_page)
+                    else:
+                        print(f"PDF file download failed for topic '{topic}'.")
+
+                    if downloaded_count >= num_documents:
+                        break
+                else:
+                    print(f"Document ID {document_id_on_page} already downloaded for topic '{topic}'.")
 
             if downloaded_count < num_documents:
                 next_button = WebDriverWait(driver, 10).until(
@@ -113,7 +185,7 @@ if __name__ == "__main__":
     driver.get("http://consultajurisprudencial.ramajudicial.gov.co:8080/WebRelatoria/csj/index.xhtml")
 
     for topic in temas_legales:
-        download_documents(driver, topic, num_documents=2)
+        download_documents(driver, topic, NUM_DOCUMENTS)
         move_downloaded_files(topic)
 
     driver.quit()
