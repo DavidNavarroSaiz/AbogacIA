@@ -16,21 +16,41 @@ class UtilsDB():
         
 
     def delete_DB_document_and_file(self, filename):
-        result = self.vectordb.get(where={"source": filename})
-        if result.get('ids') != []:
-            document_ids = result.get('ids')
-            self.vectordb.delete(document_ids)
+        """
+        Deletes a document from the database and its corresponding file.
+
+        Args:
+            filename (str): The name of the file to delete.
+        """
+        file_to_delete = None
+
+        # Search for the file in the downloaded folders
+        for root, dirs, files in os.walk("./downloads"):
+            if filename in files:
+                file_to_delete = os.path.join(root, filename)
+                break
+
+        if file_to_delete and os.path.exists(file_to_delete):
+            os.remove(file_to_delete)
+            print(f"File '{file_to_delete}' deleted from the folder.")
+        else:
+            print(f"File '{filename}' not found in the folder.")
+
+        # Retrieve all documents from the database and filter by filename
+        all_documents = self.vectordb.get()
+        matching_ids = [
+            doc_id for doc_id, metadata in zip(all_documents['ids'], all_documents['metadatas'])
+            if metadata['source'].endswith(filename)
+        ]
+
+        if matching_ids:
+            self.vectordb.delete(matching_ids)
             print(f"Document with filename '{filename}' deleted from the database.")
         else:
             print(f"Document with filename '{filename}' not found in the database.")
 
-        if os.path.exists(filename):
-            os.remove(filename)
-            print(f"File '{filename}' deleted from the folder.")
-        else:
-            print(f"File '{filename}' not found in the folder.")
+        print(f"There are {self.vectordb._collection.count()} documents in the collection after deleting.")
 
-        print("There are", self.vectordb._collection.count(), "documents in the collection after deleting.")
 
     def add_db_doc(self, filename):
         print("filename",filename)
