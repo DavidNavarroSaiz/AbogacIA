@@ -21,19 +21,23 @@ class UtilsDB():
 
         Args:
             filename (str): The name of the file to delete.
+
+        Returns:
+            dict: A dictionary containing the status and message of the deletion process.
         """
-        file_to_delete = None
+        file_deleted = False
+        db_deleted = False
 
         # Search for the file in the downloaded folders
         for root, dirs, files in os.walk("./downloads"):
             if filename in files:
                 file_to_delete = os.path.join(root, filename)
+                os.remove(file_to_delete)
+                file_deleted = True
+                print(f"File '{file_to_delete}' deleted from the folder.")
                 break
 
-        if file_to_delete and os.path.exists(file_to_delete):
-            os.remove(file_to_delete)
-            print(f"File '{file_to_delete}' deleted from the folder.")
-        else:
+        if not file_deleted:
             print(f"File '{filename}' not found in the folder.")
 
         # Retrieve all documents from the database and filter by filename
@@ -45,11 +49,22 @@ class UtilsDB():
 
         if matching_ids:
             self.vectordb.delete(matching_ids)
+            db_deleted = True
             print(f"Document with filename '{filename}' deleted from the database.")
         else:
             print(f"Document with filename '{filename}' not found in the database.")
 
         print(f"There are {self.vectordb._collection.count()} documents in the collection after deleting.")
+
+        if file_deleted and db_deleted:
+            return {"status": "success", "message": f"Document '{filename}' deleted successfully from both the folder and the database."}
+        elif file_deleted:
+            return {"status": "partial success", "message": f"Document '{filename}' deleted from the folder but not found in the database."}
+        elif db_deleted:
+            return {"status": "partial success", "message": f"Document '{filename}' deleted from the database but not found in the folder."}
+        else:
+            return {"status": "failure", "message": f"Document '{filename}' not found in both the folder and the database."}
+
 
 
     def add_db_doc(self, filename):

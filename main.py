@@ -36,11 +36,12 @@ async def download_documents(request: DownloadRequest):
 @app.delete("/delete_document/")
 async def delete_document(request: DeleteRequest):
     try:
-
+        load_dotenv()
+        openai.api_key = os.getenv("OPENAI_API_KEY")
         vectordb = Chroma(persist_directory="abogacia_data", embedding_function=OpenAIEmbeddings())
         utils_db = UtilsDB(vectordb)
-        utils_db.delete_DB_document_and_file(request.filename)
-        return {"status": "success", "message": f"Document {request.filename} deleted successfully."}
+        result = utils_db.delete_DB_document_and_file(request.filename)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
