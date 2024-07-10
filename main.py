@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict
 from document_downloader import DocumentDownloader
-from utils_db import UtilsDB
+from utils_Chromadb import UtilsDB
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from utils_mongoDb import MongoDBUtils

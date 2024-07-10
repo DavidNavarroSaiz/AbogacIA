@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
 import shutil
-from utils_db import UtilsDB
+from utils_Chromadb import UtilsDB
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 import openai
