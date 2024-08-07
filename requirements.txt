@@ -1,0 +1,12 @@
+fastapi==0.112.0
+langchain==0.2.12
+langchain_community==0.2.11
+langchain_mongodb==0.1.7
+langchain_openai==0.1.20
+openai==1.40.1
+pydantic==2.8.2
+pymongo==4.8.0
+python-dotenv==1.0.1
+selenium==4.23.1
+tiktoken==0.7.0
+uvicorn==0.30.5

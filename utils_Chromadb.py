@@ -172,8 +172,8 @@ if __name__ == "__main__":
     openai.api_key = os.getenv("OPENAI_API_KEY")
     vectordb = Chroma(persist_directory="abogacia_data",embedding_function=OpenAIEmbeddings())   
     utils_db = UtilsDB(vectordb)
-    result = utils_db.number_of_sources_docs()
-    print(result)
-    question = "tengo un caso de una separacion en curso, una de las personas fallecio, como funcionaria la separacion de bienes en ese proceso?"
+    num_sources_urls, num_docs_urls, num_sources_non_urls, num_docs_non_urls = utils_db.number_of_sources_docs()
+    print(f"num_sources_urls: {num_sources_urls}, num_docs_urls: {num_docs_urls},num_sources_non_urls: {num_sources_non_urls}, num_docs_non_urls: {num_docs_non_urls} ")
+    # question = "tengo un caso de una separacion en curso, una de las personas fallecio, como funcionaria la separacion de bienes en ese proceso?"
     question = "quiero generar un documento de separacion entre dos personas, el caso es muy complejo por que hay violencia infantil, el señor abuso de la hija, y le pegaba constantemente a la esposa"
     result = utils_db.ask_vector_db(question)
